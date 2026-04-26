@@ -1,0 +1,13 @@
+.env
+service_account.json
+credentials.json
+client_secret.json
+data/
+*.db
+*.db-journal
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+.DS_Store
