@@ -133,8 +133,20 @@ async def webhook(request: Request) -> dict:
             await manager.on_text(event)
         elif isinstance(event, IncomingReaction):
             await manager.on_reaction(event)
-    except Exception:
+    except Exception as exc:
         log.exception("handler crashed | event=%s", event)
+        # Don't go silent — tell the user the action failed so they don't sit waiting.
+        try:
+            chat = getattr(event, "chat_id", None)
+            msg_id = getattr(event, "msg_id", None)
+            if chat and green is not None:
+                await green.send_message(
+                    chat,
+                    f"⚠️ משהו השתבש בעיבוד ההודעה ({type(exc).__name__}). נסה שוב, או פנה למנהל אם זה חוזר.",
+                    quoted_msg_id=msg_id,
+                )
+        except Exception:
+            log.exception("failed to send user-facing error notice")
         return {"ok": True, "ignored": "handler_error"}
 
     if event_id:
